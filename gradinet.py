@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# odwrotnie
-wielo = (1, -8, 3)
-der = (-8, 6)
-# 0.1 jest ok, 0.3 zygzakuje
-beta = 0.1
-start = 10
-limit = 0.001
+wielo = (0, -3, -5, 0, 1) # wspolczynniki wielomianu od tylu
+der = (-3, -10, 0, 4) # wspolczynniki pochodnej wielomianu od tylu
+beta = 0.01 # wspolczynnik uczenia
+start = 3 # punkt startowy
+limit = 0.001 # limit wielkosci kroku, zeby metoda skonczyla prace, bo znalazla minimum
 
+# liczy wartosc wielomianu w podanym punkcie
 def licz_wielo(wielo, x):
 	suma = 0
 	for i in range(len(wielo)):
@@ -17,7 +16,7 @@ def licz_wielo(wielo, x):
 
 run = True
 now = start
-points = []
+points = [start]
 counter = 0
 while run:
 	counter += 1
@@ -27,13 +26,13 @@ while run:
 	points.append(now)
 
 	# stop
-	if abs(add) < limit or counter > 100:
+	if abs(add) < limit or counter > 1000:
 		run = False
 
 print("Minimum lokalne: ", now)
 print("Liczba krokow: ", counter)
 
-x = np.arange(-10, 10, 1)
+x = np.arange(-3, 3.3, 0.1)
 y = licz_wielo(wielo, x)
 
 pointsy = []
