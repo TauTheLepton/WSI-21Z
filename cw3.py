@@ -156,7 +156,7 @@ def randomMove(board):
     return moves[move_idx]
 
 # plays the game with human in command line
-def playGame(n, m, k):
+def playGame(n, m, k, depth, alpha_beta, random):
     player = None
     while player != "y" and player != "n":
         player = input("Do you want to start? [y/n] ")
@@ -175,7 +175,12 @@ def playGame(n, m, k):
                 move = int(move)
                 board = makeMove(board, moves[move], 1)
             else:
-                eval, move = miniMax(board, k, 100, 0, None, 0)
+                if random:
+                    move = randomMove(board)
+                elif alpha_beta:
+                    eval, move = miniMaxAlphaBeta(board, k, depth, None, 0, -math.inf, math.inf)
+                else:
+                    eval, move = miniMax(board, k, depth, 0, None, 0)
                 board = makeMove(board, move, 0)
             print(board)
             player = not player
@@ -203,7 +208,7 @@ def playGameBot(n, m, k, depth1, alpha_beta1, random1, depth2, alpha_beta2, rand
                 if random2:
                     move = randomMove(board)
                 elif alpha_beta2:
-                    eval, move = miniMaxAlphaBeta(board, k, depth2, None, 1, -math.inf, math.inf)
+                    eval, move = miniMaxAlphaBeta(board, k, depth2, None, 0, -math.inf, math.inf)
                 else:
                     eval, move = miniMax(board, k, depth2, 0, None, 0)
                 board = makeMove(board, move, 0)
@@ -216,21 +221,21 @@ def playGameBot(n, m, k, depth1, alpha_beta1, random1, depth2, alpha_beta2, rand
 
 def main():
     # board = makeBoard(3, 3)
-    # k=2
+    # k=3
     # # moves = getMoves(board)
     # # print(board)
     # # print(moves)
     # # eval, move = miniMax(board, k, 6, 0, None, True)
     # # print(eval, move)
-    # board = makeMove(board, (2, 0), 1)
+    # board = makeMove(board, (1, 0), 1)
     # board = makeMove(board, (1, 1), 1)
-    # board = makeMove(board, (0, 2), 1)
+    # board = makeMove(board, (1, 2), 1)
     # print(board)
     # print(checkWinner(board, k))
 
-    # playGame(3, 3, 3)
-    playGameBot(3, 3, 3, 2, True, False, 10, False, False)
-    # heuristics = generateHeuristics(5, 5, 4)
+    # playGame(3, 3, 3, 6, True, False)
+    playGameBot(3, 3, 3, 3, False, False, 3, True, False)
+    # heuristics = generateHeuristics(3, 3, 3)
     # print(heuristics)
 
 if __name__ == '__main__':
