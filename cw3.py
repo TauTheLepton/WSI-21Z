@@ -87,67 +87,115 @@ def heuristicsFunction(board, k):
     for i in range(n):
         for j in range(m):
             sum += heuristics[i][j] * board[i][j]
+    winner = checkWinner(board, k)
+    if winner == 1:
+        sum += 5
+    elif winner == -1:
+        sum -= 5
     return sum
+
+def getBestMove(w, best_moves, max):
+    if max:
+        best_w = -math.inf
+    else:
+        best_w = math.inf
+    for i in range(len(w)):
+        if max:
+            if w[i] > best_w:
+                best_w = w[i]
+                best_move = best_moves[i]
+        else:
+            if w[i] < best_w:
+                best_w = w[i]
+                best_move = best_moves[i]
+    return best_w, best_move
 
 # returns best move calculated by minimax algorithm
 def miniMax(board_original, k, depth, best_eval, best_move, max_turn):
     winner = checkWinner(board_original, k)
-    if winner != 0:
-        return winner, None
+    if getMoves(board_original) == []:
+        return heuristicsFunction(board_original, k), None # winner, None
+    elif winner != 0:
+        return heuristicsFunction(board_original, k), None # winner, None
     elif depth == 0:
-        return heuristicsFunction(board_original, k), None # return 0, None
-    board = copy.deepcopy(board_original)
-    if max_turn:
-        best_eval = -math.inf
-        moves = getMoves(board)
-        for move in moves:
-            board = makeMove(board, move, True)
-            eval, best_move_new = miniMax(board, k, depth-1, best_eval, best_move, False)
-            if eval > best_eval:
-                best_eval = eval
-                best_move = move
-        return best_eval, best_move
-    else:
-        best_eval = math.inf
-        moves = getMoves(board)
-        for move in moves:
-            board = makeMove(board, move, False)
-            eval, best_move_new = miniMax(board, k, depth-1, best_eval, best_move, True)
-            if eval < best_eval:
-                best_eval = eval
-                best_move = move
-        return best_eval, best_move
+        return heuristicsFunction(board_original, k), None # 0, None
+    moves = getMoves(board_original)
+    w = []
+    best_moves = []
+    for move in moves:
+        board = copy.deepcopy(board_original)
+        board = makeMove(board, move, max_turn)
+        eval, best_move_new = miniMax(board, k, depth-1, best_eval, best_move, not max_turn)
+        w.append(eval)
+        best_moves.append(move)
+    if w != []:
+        best_eval, best_move = getBestMove(w, best_moves, max_turn)
+    return best_eval, best_move
 
 # returns best move calculated by minimax algorithm with alpha-beta pruning
 def miniMaxAlphaBeta(board_original, k, depth, best_move, max_turn, alpha, beta):
     winner = checkWinner(board_original, k)
-    if winner != 0:
-        return winner, None
+    if getMoves(board_original) == []:
+        return heuristicsFunction(board_original, k), None # winner, None
+    elif winner != 0:
+        return heuristicsFunction(board_original, k), None # winner, None
     elif depth == 0:
-        return heuristicsFunction(board_original, k), None # return 0, None
-    board = copy.deepcopy(board_original)
+        return heuristicsFunction(board_original, k), None # 0, None
+    moves = getMoves(board_original)
     if max_turn:
-        moves = getMoves(board)
         for move in moves:
-            board = makeMove(board, move, True)
-            eval, best_move_new = miniMaxAlphaBeta(board, k, depth-1, best_move, False, alpha, beta)
-            if eval > alpha:
-                alpha = eval
+            board = copy.deepcopy(board_original)
+            board = makeMove(board, move, max_turn)
+            alpha_new, best_move_new = miniMaxAlphaBeta(board, k, depth-1, best_move, not max_turn, alpha, beta)
+            if alpha_new > alpha:
+                alpha = alpha_new
                 best_move = move
             if alpha >= beta:
                 return beta, best_move
         return alpha, best_move
     else:
-        moves = getMoves(board)
         for move in moves:
-            board = makeMove(board, move, False)
-            eval, best_move_new = miniMaxAlphaBeta(board, k, depth-1, best_move, True, alpha, beta)
-            if eval < beta:
-                beta = eval
+            board = copy.deepcopy(board_original)
+            board = makeMove(board, move, max_turn)
+            beta_new, best_move_new = miniMaxAlphaBeta(board, k, depth-1, best_move, not max_turn, alpha, beta)
+            if beta_new < beta:
+                beta = beta_new
                 best_move = move
             if alpha >= beta:
                 return alpha, best_move
         return beta, best_move
+
+# old
+# # returns best move calculated by minimax algorithm with alpha-beta pruning
+# def miniMaxAlphaBeta(board_original, k, depth, best_move, max_turn, alpha, beta):
+#     winner = checkWinner(board_original, k)
+#     if winner != 0:
+#         return winner, None
+#     elif depth == 0:
+#         return heuristicsFunction(board_original, k), None # return 0, None
+#     board = copy.deepcopy(board_original)
+#     if max_turn:
+#         moves = getMoves(board)
+#         for move in moves:
+#             board = makeMove(board, move, True)
+#             eval, best_move_new = miniMaxAlphaBeta(board, k, depth-1, best_move, False, alpha, beta)
+#             if eval > alpha:
+#                 alpha = eval
+#                 best_move = move
+#             if alpha >= beta:
+#                 return beta, best_move
+#         return alpha, best_move
+#     else:
+#         moves = getMoves(board)
+#         for move in moves:
+#             board = makeMove(board, move, False)
+#             eval, best_move_new = miniMaxAlphaBeta(board, k, depth-1, best_move, True, alpha, beta)
+#             if eval < beta:
+#                 beta = eval
+#                 best_move = move
+#             if alpha >= beta:
+#                 return alpha, best_move
+#         return beta, best_move
 
 # returns random move from the ones available
 def randomMove(board):
@@ -180,7 +228,7 @@ def playGame(n, m, k, depth, alpha_beta, random):
                 elif alpha_beta:
                     eval, move = miniMaxAlphaBeta(board, k, depth, None, 0, -math.inf, math.inf)
                 else:
-                    eval, move = miniMax(board, k, depth, 0, None, 0)
+                    eval, move = miniMax(board, k, depth, math.inf, None, 0)
                 board = makeMove(board, move, 0)
             print(board)
             player = not player
@@ -200,18 +248,18 @@ def playGameBot(n, m, k, depth1, alpha_beta1, random1, depth2, alpha_beta2, rand
                 if random1:
                     move = randomMove(board)
                 elif alpha_beta1:
-                    eval, move = miniMaxAlphaBeta(board, k, depth1, None, 1, -math.inf, math.inf)
+                    eval, move = miniMaxAlphaBeta(board, k, depth1, None, player, -math.inf, math.inf)
                 else:
-                    eval, move = miniMax(board, k, depth2, 0, None, 1)
-                board = makeMove(board, move, 1)
+                    eval, move = miniMax(board, k, depth1, -math.inf, None, player)
+                board = makeMove(board, move, player)
             else:
                 if random2:
                     move = randomMove(board)
                 elif alpha_beta2:
-                    eval, move = miniMaxAlphaBeta(board, k, depth2, None, 0, -math.inf, math.inf)
+                    eval, move = miniMaxAlphaBeta(board, k, depth2, None, player, -math.inf, math.inf)
                 else:
-                    eval, move = miniMax(board, k, depth2, 0, None, 0)
-                board = makeMove(board, move, 0)
+                    eval, move = miniMax(board, k, depth2, math.inf, None, player)
+                board = makeMove(board, move, player)
             print(board) # let's see the game
             player = not player
         else:
@@ -227,15 +275,15 @@ def main():
     # # print(moves)
     # # eval, move = miniMax(board, k, 6, 0, None, True)
     # # print(eval, move)
-    # board = makeMove(board, (1, 0), 1)
-    # board = makeMove(board, (1, 1), 1)
-    # board = makeMove(board, (1, 2), 1)
+    # board = makeMove(board, (0, 0), 1)
+    # board = makeMove(board, (0, 1), 1)
+    # board = makeMove(board, (0, 2), 1)
     # print(board)
     # print(checkWinner(board, k))
 
     # playGame(3, 3, 3, 6, True, False)
-    playGameBot(3, 3, 3, 3, False, False, 3, True, False)
-    # heuristics = generateHeuristics(3, 3, 3)
+    playGameBot(3, 3, 3, 4, True, False, 3, True, False)
+    # heuristics = generateHeuristics(5, 5, 4)
     # print(heuristics)
 
 if __name__ == '__main__':
