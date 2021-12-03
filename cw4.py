@@ -9,7 +9,6 @@ def readFile(file_name):
         data = [list(row) for row in reader]
         header = data[0]
         data.remove(data[0])
-    # data = convertDataToFloat(data)
     return data, header
 
 # was supposed to convert every element of data from string to float, but it doesn't matter
@@ -43,47 +42,44 @@ def getDList(data):
             D.append(float(item[d_idx]))
     return D
 
+# calculates one model params for given idx (column / data type) and filters only for given d
 def calculateOneModel(data, idx, d):
     d_idx = getDIdx(data)
-    sum_value = 0
-    count_d = 0
+    d_data = []
     for item in data:
         if item[d_idx] == d:
-            count_d += 1
-            sum_value += item[idx]
-    mean = sum_value/count_d
-    sum_value = 0
-    count_d = 0
-    for item in data:
-        if item[d_idx] == d:
-            count_d += 1
-            sum_value = (item[idx] - mean) ** 2
-    variance = sum_value/count_d
-    return mean, variance
+            d_data.append(item[idx])
+    mean = np.mean(d_data)
+    std = np.std(d_data)
+    return mean, std
 
+# calculates models od every idx for every d, so all models
 def calculateModels(data):
     D = getDList(data)
     models = {}
     for d in D:
         models_param = {}
         for idx in range(len(data[0])-1):
-            mean, variance = calculateOneModel(data, idx, d)
-            model = dict([('mean', mean), ('variance', variance)])
+            mean, std = calculateOneModel(data, idx, d)
+            model = dict([('mean', mean), ('std', std)])
             models_param[idx] = model
-            # models.append((d, idx, mean, variance))
         models[d] = models_param
     return models
 
+# calculates model value - probability that given individual is in class d
 def calculateModelValue(models, d, indiv):
     end_probab = 1
+    end_probab1 = 0
     *indiv_data, indiv_d = indiv
     for i in range(len(indiv_data)):
-        # COS W TYM ROWNANIU JEST ZLE ALE NWM CO
-        tmp = ((indiv_data[i] - models[d][i]['mean']) ** 2) / (models[d][i]['variance'] ** 2)
-        probab = (1 / math.sqrt(2 * math.pi * (models[d][i]['variance'] ** 2))) * math.exp(-tmp / 2) # ZAWSZE WYCHODZI 0
+        index = -(((indiv_data[i] - models[d][i]['mean']) ** 2) / (2 * models[d][i]['std'] ** 2))
+        probab = (1 / (math.sqrt(2 * math.pi) * models[d][i]['std'])) * math.exp(index)
         end_probab *= probab
-    return end_probab
+        end_probab1 += math.log(probab, math.e)
+    end_probab1 = math.exp(end_probab1)
+    return end_probab1
 
+# calculates best d for given item
 def calcBestD(data, models, test_item):
     D = getDList(data)
     best_probab = 0
@@ -95,9 +91,10 @@ def calcBestD(data, models, test_item):
             best_d = d
     return best_d
 
+# does everything, divides data, learns on one part (coef) and tests on the other part
 def test(file_name, coef):
-    orig_data, header = readFile(file_name)
-    data = convertDataToFloat(orig_data)
+    data, header = readFile(file_name)
+    data = convertDataToFloat(data)
     d_idx = getDIdx(data)
     learn_data, test_data = divideLearnTestData(data, coef)
     models = calculateModels(learn_data)
@@ -115,7 +112,7 @@ def test(file_name, coef):
     print("Average mistake:", sum_best_d/count_best_d)
 
 def main():
-    test('winequality-white.csv', 0.6)
+    test('\do_backupu\Studia\sem_5\wsi\WSI-21Z\winequality-white.csv', 0.6)
 
 if __name__ == '__main__':
     main()
