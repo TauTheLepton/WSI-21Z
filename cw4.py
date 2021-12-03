@@ -1,5 +1,6 @@
 import csv
 import math
+import numpy as np
 
 # returns list of tuples as data with onli the data and header is one tuple with names of elements in tuples
 def readFile(file_name):
@@ -79,7 +80,7 @@ def calculateModelValue(models, d, indiv):
     for i in range(len(indiv_data)):
         # COS W TYM ROWNANIU JEST ZLE ALE NWM CO
         tmp = ((indiv_data[i] - models[d][i]['mean']) ** 2) / (models[d][i]['variance'] ** 2)
-        probab = 1 / math.sqrt(2 * math.pi * models[d][i]['variance'] ** 2) * math.exp(-1/2 * tmp)
+        probab = (1 / math.sqrt(2 * math.pi * (models[d][i]['variance'] ** 2))) * math.exp(-tmp / 2) # ZAWSZE WYCHODZI 0
         end_probab *= probab
     return end_probab
 
@@ -95,8 +96,8 @@ def calcBestD(data, models, test_item):
     return best_d
 
 def test(file_name, coef):
-    data, header = readFile(file_name)
-    data = convertDataToFloat(data)
+    orig_data, header = readFile(file_name)
+    data = convertDataToFloat(orig_data)
     d_idx = getDIdx(data)
     learn_data, test_data = divideLearnTestData(data, coef)
     models = calculateModels(learn_data)
