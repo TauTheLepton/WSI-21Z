@@ -25,6 +25,21 @@ def divideLearnTestData(data, coef):
     test_data = data[int(len(data)*coef):]
     return learn_data, test_data
 
+def divideDataIntoSets(data, k):
+    sets = []
+    set_length = int(len(data) / k)
+    for i in range(k):
+        sets.append(data[i*set_length:(i+1)*set_length])
+    return sets
+
+def mergeSets(sets, exclude_set):
+    merged = []
+    for set in sets:
+        if set != exclude_set:
+            for item in set:
+                merged.append(item)
+    return merged
+
 # returns index of element d, so in this case the last one
 def getDIdx(data):
     return len(data[0])-1
@@ -111,8 +126,43 @@ def test(file_name, coef):
     print("Win rate:", win_rate/len(test_data))
     print("Average mistake:", sum_best_d/count_best_d)
 
+def testCrossValidation(file_name, k):
+    data, header = readFile(file_name)
+    data = convertDataToFloat(data)
+    d_idx = getDIdx(data)
+    dataSets = divideDataIntoSets(data, k)
+    accuracy = []
+    mistake = []
+    for dataSet in dataSets:
+        learn_data = mergeSets(dataSets, dataSet)
+        test_data = dataSet
+        models = calculateModels(learn_data)
+        sum_best_d = 0
+        count_best_d = 0
+        win_rate = 0
+        for test_item in test_data:
+            best_d = calcBestD(data, models, test_item)
+            if best_d == test_item[d_idx]:
+                win_rate += 1
+            else:
+                sum_best_d += abs(best_d - test_item[d_idx])
+                count_best_d += 1
+        accuracy.append(win_rate/len(test_data))
+        mistake.append(sum_best_d/count_best_d)
+    end_accuracy = sum(accuracy)/len(accuracy)
+    end_mistake = sum(mistake)/len(mistake)
+    print("Win rate:", end_accuracy)
+    print("Average mistake:", end_mistake)
+
 def main():
-    test('\do_backupu\Studia\sem_5\wsi\WSI-21Z\winequality-white.csv', 0.6)
+    # test('winequality-white.csv', 0.6)
+    testCrossValidation('winequality-white.csv', 4)
+    # data, header = readFile('winequality-white-test.csv')
+    # sets = divideDataIntoSets(data, 4)
+    # for set in sets:
+    #     print(set)
+    #     print()
+    # mergeSets(sets, sets[0])
 
 if __name__ == '__main__':
     main()
