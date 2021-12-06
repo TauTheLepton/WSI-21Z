@@ -52,10 +52,10 @@ def getDList(data):
     for item in data:
         is_d = False
         for d in D:
-            if float(item[d_idx]) == d:
+            if item[d_idx] == d:
                 is_d = True
         if not is_d:
-            D.append(float(item[d_idx]))
+            D.append(item[d_idx])
     return D
 
 # calculates one model params for given idx (column / data type) and filters only for given d
@@ -157,7 +157,7 @@ def test(file_name, coef):
     print("Win rate:", win_rate/len(test_data))
     print("Average mistake:", sum_best_d/count_best_d)
 
-# tests whole implementation with cross validation with given aamount of sets (k)
+# tests whole implementation with cross validation with given amount of sets (k)
 def testCrossValidation(file_name, k):
     data, header = readFile(file_name)
     data = convertDataToFloat(data)
