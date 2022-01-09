@@ -53,6 +53,26 @@ class QLearning:
             idx = 0
         return action_values[idx], names[idx]
 
-    def learn(self):
+    def getMoveAndNewState(self):
         action_value, name = self.chooseMove()
-        # TODO dokończyć ta funkcje i wgl cala klase qlearning
+        move = self.maze.checkMove(name)
+        if move == None:
+            if self.state == 0:
+                new_state = 0
+            else:
+                new_state = 1
+        else:
+            if self.maze.isRightWay(name):
+                new_state = 2
+            else:
+                new_state = 3
+            if move == self.maze.finish:
+                new_state = 4
+        return move, name, new_state
+
+    def learn(self):
+        move, name, new_state = self.getMoveAndNewState()
+        self.updateTable(name, new_state)
+        self.maze.makeMove(move)
+        if self.maze.checkIfWon():
+            pass # TODO idk, add some ending or sth

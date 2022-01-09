@@ -94,6 +94,9 @@ class Maze:
         if self.isPosEmpty(pos):
             self.position = pos
             self.historical_positions.append(pos)
+            return True
+        else:
+            return False
 
     def checkMove(self, move_name, pos=None):
         """
