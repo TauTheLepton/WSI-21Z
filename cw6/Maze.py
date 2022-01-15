@@ -121,17 +121,17 @@ class Maze:
                 return True
             elif name == 'up':
                 return False
-        else:
+        elif self.position[0] > self.finish[0]:
             if name == 'down':
                 return False
             elif name == 'up':
                 return True
-        if self.position[1] < self.finish[1]:
+        elif self.position[1] < self.finish[1]:
             if name == 'right':
                 return True
             elif name == 'left':
                 return False
-        else:
+        elif self.position[1] > self.finish[1]:
             if name == 'right':
                 return False
             elif name == 'left':
