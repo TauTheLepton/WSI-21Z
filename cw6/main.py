@@ -1,15 +1,12 @@
 from Maze import Maze
 from QLearning import QLearning
 
-def readSimpleMap():
-    map = """....
+small_map = """....
 .S#.
 .##.
 ..F."""
-    return map
 
-def readMap(): # TODO read from file (?)
-    map = """...#############
+big_map = """...#############
 ...#..S..#..#..#
 #..####..#..#..#
 #........#.....#
@@ -20,16 +17,17 @@ def readMap(): # TODO read from file (?)
 #..#..#######..#
 #.....#.........
 #############..."""
-    return map
 
 def main():
-    # set here map and number of iterations to use
-    map = readSimpleMap()
-    iterations = 10 ** 6
+    global small_map, big_map
 
-    M = Maze(map)
+    # set here map and number of iterations to use
+    map_to_use = small_map
+    iterations = 10 ** 4
+
+    M = Maze(map_to_use)
     print(M.maze)
-    Q = QLearning(map, 0.1, 0.9)
+    Q = QLearning(map_to_use, 0.1, 0.9)
     Q.learn(iterations)
     for item in Q.maze_history:
         print(item)

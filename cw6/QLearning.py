@@ -40,7 +40,6 @@ class QLearning:
 
     def updateTable(self, name, new_state):
         name_idx = self.names.index(name)
-        # print(name)
         temp = self.checkReward()[name] + self.discount * max(self.qtable[new_state, :]) - self.qtable[self.state][name_idx]
         self.qtable[self.state][name_idx] = self.qtable[self.state][name_idx] + self.alpha * temp
 
@@ -59,9 +58,7 @@ class QLearning:
 
     def getMoveAndNewState(self):
         action_value, name = self.chooseMove()
-        # print('name', name)
         move = self.maze.checkMove(name)
-        # print('move', move)
         if move == None:
             if self.state == 0:
                 new_state = 0
@@ -83,6 +80,5 @@ class QLearning:
                 self.qtable_history.append(self.qtable)
             else:
                 move, name, new_state = self.getMoveAndNewState()
-                # print(move)
                 self.updateTable(name, new_state)
                 self.maze.makeMove(move)

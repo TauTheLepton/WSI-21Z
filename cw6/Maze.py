@@ -97,7 +97,6 @@ class Maze:
         elif self.isPosEmpty(pos):
             self.position = pos
             self.historical_positions.append(pos)
-            # print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
             return True
         else:
             return False
@@ -109,8 +108,6 @@ class Maze:
         """
         if pos == None:
             moves = self.getMoves(self.position)
-            # print(self.position)
-            # print(moves)
         else:
             moves = self.getMoves(pos)
         for move_loop, move_name_loop in moves.items():
