@@ -14,6 +14,8 @@ class QLearning:
         self.alpha = alpha
         self.state = 0 # TODO
         self.discount = discount
+        self.maze_history = []
+        self.qtable_history = []
 
     def makeQTable(self):
         # subtable = {name: 0.0 for name in self.names}
@@ -37,8 +39,10 @@ class QLearning:
         return rewards
 
     def updateTable(self, name, new_state):
-        temp = self.checkReward()[name] + self.discount * max(self.qtable[new_state, :]) - self.qtable[self.state][name]
-        self.qtable[self.state][name] = self.qtable[self.state][name] + self.alpha * temp
+        name_idx = self.names.index(name)
+        # print(name)
+        temp = self.checkReward()[name] + self.discount * max(self.qtable[new_state, :]) - self.qtable[self.state][name_idx]
+        self.qtable[self.state][name_idx] = self.qtable[self.state][name_idx] + self.alpha * temp
 
     def chooseMove(self):
         action_values = []
@@ -55,7 +59,9 @@ class QLearning:
 
     def getMoveAndNewState(self):
         action_value, name = self.chooseMove()
+        # print('name', name)
         move = self.maze.checkMove(name)
+        # print('move', move)
         if move == None:
             if self.state == 0:
                 new_state = 0
@@ -70,9 +76,13 @@ class QLearning:
                 new_state = 4
         return move, name, new_state
 
-    def learn(self):
-        move, name, new_state = self.getMoveAndNewState()
-        self.updateTable(name, new_state)
-        self.maze.makeMove(move)
-        if self.maze.checkIfWon():
-            pass # TODO idk, add some ending or sth
+    def learn(self, iters):
+        for i in range(iters):
+            if self.maze.checkIfWon():
+                self.maze_history.append(self.maze.startFromBegining())
+                self.qtable_history.append(self.qtable)
+            else:
+                move, name, new_state = self.getMoveAndNewState()
+                # print(move)
+                self.updateTable(name, new_state)
+                self.maze.makeMove(move)

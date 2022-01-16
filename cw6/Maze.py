@@ -91,9 +91,13 @@ class Maze:
         pos: tuple with position to move
         if this position is empty move there and add this move to history
         """
-        if self.isPosEmpty(pos):
+        if pos == None:
+            # situation when wants to move into wall, so move can't happen
+            return False
+        elif self.isPosEmpty(pos):
             self.position = pos
             self.historical_positions.append(pos)
+            # print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
             return True
         else:
             return False
@@ -105,6 +109,8 @@ class Maze:
         """
         if pos == None:
             moves = self.getMoves(self.position)
+            # print(self.position)
+            # print(moves)
         else:
             moves = self.getMoves(pos)
         for move_loop, move_name_loop in moves.items():
@@ -137,3 +143,9 @@ class Maze:
             elif name == 'left':
                 return True
         return None
+
+    def startFromBegining(self):
+        historical_positions = self.historical_positions
+        self.position = self.getStartPos()
+        self.historical_positions = []
+        return historical_positions
